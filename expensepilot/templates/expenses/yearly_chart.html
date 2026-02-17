@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Yearly Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h2>Yearly Expense Chart</h2>
+<canvas id="yearChart"></canvas>
+
+<script>
+const labels = [{% for d in data %}"{{ d.year|date:'Y' }}",{% endfor %}];
+const values = [{% for d in data %}{{ d.total }},{% endfor %}];
+
+new Chart(document.getElementById('yearChart'), {
+  type: 'line',
+  data: { labels: labels, datasets: [{ label: 'Yearly Expense', data: values }] }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+{% extends "admin/base.html" %}
+
+{% block nav-global %}
+<div id="user-tools">
+    <a href="{% url 'admin_dashboard' %}">View Site</a> /
+    {{ block.super }}
+</div>
+{% endblock %}

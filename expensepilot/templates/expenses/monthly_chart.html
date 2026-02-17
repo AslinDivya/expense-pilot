@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Monthly Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h2>Monthly Expense Chart</h2>
+<canvas id="myChart"></canvas>
+
+<script>
+const labels = [{% for d in data %}"{{ d.month|date:'M Y' }}",{% endfor %}];
+const values = [{% for d in data %}{{ d.total }},{% endfor %}];
+
+new Chart(document.getElementById('myChart'), {
+  type: 'bar',
+  data: { labels: labels, datasets: [{ label: 'Monthly Expense', data: values }] }
+});
+</script>
+
+</body>
+</html>

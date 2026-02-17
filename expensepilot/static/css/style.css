@@ -1,0 +1,59 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* HOME BACKGROUND */
+.bg-home {
+  background: url("https://images.unsplash.com/photo-1554224155-6726b3ff858f")
+              no-repeat center center/cover;
+  min-height: 100vh;
+}
+
+/* LOGIN / REGISTER BACKGROUND */
+.bg-auth {
+  background: url("https://images.unsplash.com/photo-1559526324-593bc073d938")
+              no-repeat center center/cover;
+  min-height: 100vh;
+}
+
+/* HOME PAGE */
+.main-title {
+  font-size: 3rem;
+  color: white;
+  font-weight: bold;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
+}
+
+.home-card {
+  background: rgba(255,255,255,0.95);
+  max-width: 520px;
+  margin: auto;
+  border-radius: 15px;
+}
+
+/* AUTH CARDS */
+.auth-card {
+  max-width: 420px;
+  margin: auto;
+  padding: 25px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.95);
+}
+
+/* DASHBOARD */
+.dashboard-card {
+  background: url("https://images.unsplash.com/photo-1526304640581-d334cdbbf45e")
+              no-repeat center center/cover;
+  color:black;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* TABLE */
+table {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
