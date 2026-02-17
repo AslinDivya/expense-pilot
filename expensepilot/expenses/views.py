@@ -8,9 +8,9 @@ from django.contrib.auth import authenticate, login
 from .models import Expense
 from .forms import ExpenseForm, RegisterForm
 from django.shortcuts import redirect
-
+from collections import defaultdict
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+import calendar
 
 def home(request):
     return render(request, 'home.html')
@@ -143,10 +143,25 @@ def user_login(request):
 
     return render(request, 'login.html')
 
-def admin_dashboard(request):
-    total_users = User.objects.count()
-    total_expenses = Expense.objects.count()
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth, TruncYear
+from collections import defaultdict
+import json
 
+def admin_dashboard(request):
+    if not request.user.is_superuser:
+        return redirect('home')
+
+    total_users = User.objects.count()
+    total_expenses = Expense.objects.aggregate(
+        Sum('amount')
+    )['amount__sum'] or 0
+
+    # -----------------------
+    # MONTHLY TOTAL
+    # -----------------------
     monthly = (
         Expense.objects
         .annotate(month=TruncMonth('date'))
@@ -155,7 +170,27 @@ def admin_dashboard(request):
         .order_by('month')
     )
 
-    # Yearly data
+    # User-wise monthly
+    user_month_raw = (
+        Expense.objects
+        .annotate(month=TruncMonth('date'))
+        .values('month', 'user__username')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    user_month_data = defaultdict(list)
+
+    for item in user_month_raw:
+        month_str = item['month'].strftime("%b %Y")
+        user_month_data[month_str].append({
+            "username": item['user__username'],
+            "amount": float(item['total'])
+        })
+
+    # -----------------------
+    # YEARLY TOTAL
+    # -----------------------
     yearly = (
         Expense.objects
         .annotate(year=TruncYear('date'))
@@ -164,11 +199,34 @@ def admin_dashboard(request):
         .order_by('year')
     )
 
+    # User-wise yearly
+    yearly_user_raw = (
+        Expense.objects
+        .annotate(year=TruncYear('date'))
+        .values('year', 'user__username')
+        .annotate(total=Sum('amount'))
+        .order_by('year')
+    )
+
+    user_year_data = defaultdict(list)
+
+    for item in yearly_user_raw:
+        year_str = item['year'].strftime("%Y")
+        user_year_data[year_str].append({
+            "username": item['user__username'],
+            "amount": float(item['total'])
+        })
+
+    # -----------------------
+    # FINAL CONTEXT (ONLY ONCE)
+    # -----------------------
     context = {
         'total_users': total_users,
         'total_expenses': total_expenses,
         'monthly': monthly,
         'yearly': yearly,
+        'user_month_data': json.dumps(user_month_data),
+        'user_year_data': json.dumps(user_year_data),
     }
 
     return render(request, 'expenses/admin_dashboard.html', context)
