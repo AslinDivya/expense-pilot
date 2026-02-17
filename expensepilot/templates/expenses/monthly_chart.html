@@ -8,13 +8,16 @@
 
 <h2>Monthly Expense Chart</h2>
 
-<canvas id="monthlyChart"></canvas>
+<canvas id="monthlyChart" width="600" height="300"></canvas>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-    const labels = {{ labels|safe }};
-    const data = {{ data|safe }};
+    const labels = JSON.parse('{{ labels|escapejs }}');
+    const data = JSON.parse('{{ amounts|escapejs }}');
+
+    console.log(labels);
+    console.log(data);
 
     new Chart(document.getElementById('monthlyChart'), {
         type: 'bar',

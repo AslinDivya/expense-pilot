@@ -99,13 +99,34 @@ def expense_delete(request, pk):
 
 
 @login_required
+
+
 def monthly_chart(request):
-    data = Expense.objects.filter(user=request.user)\
-        .annotate(month=TruncMonth('date'))\
-        .values('month')\
-        .annotate(total=Sum('amount'))\
+
+    monthly = (
+        Expense.objects
+        .filter(user=request.user)
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
         .order_by('month')
-    return render(request, 'expenses/monthly_chart.html', {'data': data})
+    )
+
+    labels = []
+    amounts = []
+
+    for item in monthly:
+        labels.append(item['month'].strftime("%b %Y"))
+        amounts.append(float(item['total']))
+
+    context = {
+        "labels": json.dumps(labels),
+        "amounts": json.dumps(amounts),
+    }
+
+    return render(request, 'expenses/monthly_chart.html', context)
+
+
 
 @login_required
 def yearly_chart(request):
