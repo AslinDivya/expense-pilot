@@ -11,6 +11,10 @@ from django.shortcuts import redirect
 from collections import defaultdict
 from django.contrib.auth.models import User
 import calendar
+from .models import Income
+from .forms import IncomeForm
+from datetime import datetime
+from .models import MonthlyFinance
 
 def home(request):
     return render(request, 'home.html')
@@ -31,19 +35,36 @@ def register_view(request):
 def dashboard(request):
 
     if request.user.is_superuser:
-        expenses = Expense.objects.all()
+        finances = MonthlyFinance.objects.all()
         is_admin = True
     else:
-        expenses = Expense.objects.filter(user=request.user)
+        finances = MonthlyFinance.objects.filter(user=request.user)
         is_admin = False
 
-    total = expenses.aggregate(total=Sum('amount'))['total'] or 0
+    finance_data = []
 
-    return render(request, 'expenses/dashboard.html', {
-        'expenses': expenses,
-        'total': total,
+    for finance in finances:
+        expenses = Expense.objects.filter(
+            user=finance.user,
+            date__year=finance.month.year,
+            date__month=finance.month.month
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        balance = finance.income - expenses
+
+        finance_data.append({
+            'month': finance.month.strftime("%B %Y"),
+            'income': finance.income,
+            'expense': expenses,
+            'balance': balance
+        })
+
+    context = {
+        'finance_data': finance_data,
         'is_admin': is_admin
-    })
+    }
+
+    return render(request, 'expenses/dashboard.html', context)
 
 
 
@@ -65,11 +86,26 @@ def expense_create(request):
             expense = form.save(commit=False)
             expense.user = request.user
             expense.save()
+
+            expense_month = expense.date.replace(day=1)
+
+            monthly_finance, created = MonthlyFinance.objects.get_or_create(
+                user=request.user,
+                month=expense_month
+            )
+
+            income_input = form.cleaned_data.get('income_for_month')
+
+            # NEW LOGIC
+            if income_input:
+                monthly_finance.income = income_input
+                monthly_finance.save()
+
             return redirect('expense_list')
     else:
         form = ExpenseForm()
-    return render(request, 'expenses/expense_form.html', {'form': form})
 
+    return render(request, 'expenses/expense_form.html', {'form': form})
 @login_required
 def expense_update(request, pk):
 
@@ -251,3 +287,17 @@ def admin_dashboard(request):
     }
 
     return render(request, 'expenses/admin_dashboard.html', context)
+
+
+def add_income(request):
+    if request.method == 'POST':
+        form = IncomeForm(request.POST)
+        if form.is_valid():
+            income = form.save(commit=False)
+            income.user = request.user
+            income.save()
+            return redirect('dashboard')  # change if needed
+    else:
+        form = IncomeForm()
+
+    return render(request, 'expenses/add_income.html', {'form': form})

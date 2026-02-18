@@ -27,7 +27,35 @@
     <a href="{% url 'expense_list' %}" class="btn btn-primary">Manage Expenses</a>
     <a href="{% url 'monthly_chart' %}" class="btn btn-info">Monthly Chart</a>
     <a href="{% url 'yearly_chart' %}" class="btn btn-warning">Yearly Chart</a>
-  </div>
+    <a href="{% url 'add_income' %}" class="btn btn-success">Add Income</a>
+
+ </div>
+ <h2>Monthly Financial Summary</h2>
+  <table border="1" cellpadding="8">
+    <tr>
+        <th>Month</th>
+        <th>Income</th>
+        <th>Expense</th>
+        <th>Balance</th>
+    </tr>
+
+    {% for data in finance_data %}
+    <tr>
+        <td>{{ data.month }}</td>
+        <td>₹ {{ data.income }}</td>
+        <td>₹ {{ data.expense }}</td>
+        <td>
+            {% if data.balance >= 0 %}
+                <span style="color:green;">₹ {{ data.balance }}</span>
+            {% else %}
+                <span style="color:red;">₹ {{ data.balance }}</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
 </div>
 
 </body>
