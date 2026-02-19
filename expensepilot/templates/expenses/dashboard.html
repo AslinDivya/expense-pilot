@@ -33,6 +33,9 @@
  <h2>Monthly Financial Summary</h2>
   <table border="1" cellpadding="8">
     <tr>
+        {% if is_admin %}
+            <th>User</th>
+        {% endif %}
         <th>Month</th>
         <th>Income</th>
         <th>Expense</th>
@@ -41,6 +44,9 @@
 
     {% for data in finance_data %}
     <tr>
+        {% if is_admin %}
+            <td>{{ data.user }}</td>
+        {% endif %}
         <td>{{ data.month }}</td>
         <td>₹ {{ data.income }}</td>
         <td>₹ {{ data.expense }}</td>
@@ -54,8 +60,6 @@
     </tr>
     {% endfor %}
 </table>
-
-
 </div>
 
 </body>
