@@ -32,32 +32,51 @@ def register_view(request):
         form = RegisterForm()
     return render(request, 'registration/register.html', {'form': form})
 @login_required
+
 def dashboard(request):
 
     if request.user.is_superuser:
-        finances = MonthlyFinance.objects.all().order_by('-month')
+        expenses = Expense.objects.all()
         is_admin = True
     else:
-        finances = MonthlyFinance.objects.filter(
-            user=request.user
-        ).order_by('-month')
+        expenses = Expense.objects.filter(user=request.user)
         is_admin = False
+
+    # Unique user-month from expenses
+    expense_months = expenses.annotate(
+        month=TruncMonth('date')
+    ).values('user', 'month').distinct()
 
     finance_data = []
 
-    for finance in finances:
+    for item in expense_months:
+        user_id = item['user']
+        month = item['month']
+
+        # Get user object safely
+        user_obj = User.objects.get(id=user_id)
+
+        # Total expense for that month
         total_expense = Expense.objects.filter(
-            user=finance.user,
-            date__year=finance.month.year,
-            date__month=finance.month.month
+            user=user_obj,
+            date__year=month.year,
+            date__month=month.month
         ).aggregate(total=Sum('amount'))['total'] or 0
 
-        balance = finance.income - total_expense
+        # Check income
+        monthly_finance = MonthlyFinance.objects.filter(
+            user=user_obj,
+            month=month
+        ).first()
+
+        income = monthly_finance.income if monthly_finance else 0
+
+        balance = income - total_expense
 
         finance_data.append({
-            'user': finance.user.username,
-            'month': finance.month.strftime("%B %Y"),
-            'income': finance.income,
+            'user': user_obj.username,
+            'month': month.strftime("%B %Y"),
+            'income': income,
             'expense': total_expense,
             'balance': balance
         })
@@ -68,6 +87,7 @@ def dashboard(request):
     }
 
     return render(request, 'expenses/dashboard.html', context)
+
 
 
 
@@ -230,12 +250,19 @@ def admin_dashboard(request):
         return redirect('home')
 
     total_users = User.objects.count()
+
     total_expenses = Expense.objects.aggregate(
         Sum('amount')
     )['amount__sum'] or 0
 
+    total_income = MonthlyFinance.objects.aggregate(
+        Sum('income')
+    )['income__sum'] or 0
+
+    total_balance = total_income - total_expenses
+
     # -----------------------
-    # MONTHLY TOTAL
+    # MONTHLY TOTAL (EXPENSE)
     # -----------------------
     monthly = (
         Expense.objects
@@ -245,26 +272,8 @@ def admin_dashboard(request):
         .order_by('month')
     )
 
-    # User-wise monthly
-    user_month_raw = (
-        Expense.objects
-        .annotate(month=TruncMonth('date'))
-        .values('month', 'user__username')
-        .annotate(total=Sum('amount'))
-        .order_by('month')
-    )
-
-    user_month_data = defaultdict(list)
-
-    for item in user_month_raw:
-        month_str = item['month'].strftime("%b %Y")
-        user_month_data[month_str].append({
-            "username": item['user__username'],
-            "amount": float(item['total'])
-        })
-
     # -----------------------
-    # YEARLY TOTAL
+    # YEARLY TOTAL (EXPENSE)
     # -----------------------
     yearly = (
         Expense.objects
@@ -274,30 +283,36 @@ def admin_dashboard(request):
         .order_by('year')
     )
 
-    # User-wise yearly
-    yearly_user_raw = (
-        Expense.objects
-        .annotate(year=TruncYear('date'))
-        .values('year', 'user__username')
-        .annotate(total=Sum('amount'))
-        .order_by('year')
-    )
+    # -----------------------
+    # USER MONTH DATA
+    # -----------------------
+    user_month_data = defaultdict(list)
+    expenses = Expense.objects.select_related('user')
 
-    user_year_data = defaultdict(list)
-
-    for item in yearly_user_raw:
-        year_str = item['year'].strftime("%Y")
-        user_year_data[year_str].append({
-            "username": item['user__username'],
-            "amount": float(item['total'])
+    for expense in expenses:
+        month_label = expense.date.strftime("%b %Y")
+        user_month_data[month_label].append({
+            "username": expense.user.username,
+            "amount": float(expense.amount)
         })
 
     # -----------------------
-    # FINAL CONTEXT (ONLY ONCE)
+    # USER YEAR DATA
     # -----------------------
+    user_year_data = defaultdict(list)
+
+    for expense in expenses:
+        year_label = expense.date.strftime("%Y")
+        user_year_data[year_label].append({
+            "username": expense.user.username,
+            "amount": float(expense.amount)
+        })
+
     context = {
         'total_users': total_users,
         'total_expenses': total_expenses,
+        'total_income': total_income,
+        'total_balance': total_balance,
         'monthly': monthly,
         'yearly': yearly,
         'user_month_data': json.dumps(user_month_data),

@@ -12,37 +12,56 @@
 <div class="container mt-5">
     <h2 class="text-center mb-4">Admin Dashboard</h2>
 
+    <!-- SUMMARY CARDS -->
     <div class="row text-center">
 
         <!-- Total Users -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card shadow p-3">
-                <h4>Total Users</h4>
-                <h2>{{ total_users }}</h2>
+                <h5>Total Users</h5>
+                <h3>{{ total_users }}</h3>
+            </div>
+        </div>
+
+        <!-- Total Income -->
+        <div class="col-md-3">
+            <div class="card shadow p-3 bg-success text-white">
+                <h5>Total Income</h5>
+                <h3>₹ {{ total_income }}</h3>
             </div>
         </div>
 
         <!-- Total Expenses -->
-        <div class="col-md-4">
-            <div class="card shadow p-3">
-                <h4>Total Expenses</h4>
-                <h2>{{ total_expenses }}</h2>
+        <div class="col-md-3">
+            <div class="card shadow p-3 bg-danger text-white">
+                <h5>Total Expenses</h5>
+                <h3>₹ {{ total_expenses }}</h3>
             </div>
         </div>
 
-        <!-- Manage Expenses -->
-        <div class="col-md-4">
-            <div class="card shadow p-3">
-                <h4>Manage</h4>
-                <a href="{% url 'expense_list' %}" class="btn btn-primary mt-2">
-                    View All Expenses
-                </a>
+        <!-- Total Balance -->
+        <div class="col-md-3">
+            <div class="card shadow p-3 {% if total_balance >= 0 %}bg-primary{% else %}bg-warning{% endif %} text-white">
+                <h5>Total Balance</h5>
+                <h3>₹ {{ total_balance }}</h3>
             </div>
         </div>
 
     </div>
 
-    <!-- Charts Row -->
+    <!-- MANAGE SECTION -->
+    <div class="row text-center mt-4">
+        <div class="col-md-12">
+            <div class="card shadow p-3">
+                <h5>Manage</h5>
+                <a href="{% url 'expense_list' %}" class="btn btn-primary mt-2">
+                    View All Expenses
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHART SECTION -->
     <div class="row mt-5">
         <div class="col-md-6">
             <h5>Monthly Expenses</h5>
@@ -55,6 +74,7 @@
         </div>
     </div>
 
+    <!-- FOOTER BUTTONS -->
     <div class="text-center mt-4">
         <a href="/admin/" class="btn btn-dark">Go to Django Admin Panel</a>
         <a href="{% url 'home' %}" class="btn btn-secondary">Home</a>
@@ -62,12 +82,16 @@
 
 </div>
 
-<!-- Chart.js -->
+<!-- CHART JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-const userMonthData = {{ user_month_data|safe }};
+const userMonthData = JSON.parse('{{ user_month_data|escapejs }}');
+const userYearData = JSON.parse('{{ user_year_data|escapejs }}');
 
+// --------------------
+// MONTHLY DATA
+// --------------------
 const monthlyLabels = [
     {% for m in monthly %}
         "{{ m.month|date:'M Y' }}",
@@ -102,14 +126,12 @@ new Chart(document.getElementById('monthlyChart'), {
 
                         let lines = [];
 
-                        // Add each user's expense first
                         if (userMonthData[month]) {
                             userMonthData[month].forEach(function(user) {
                                 lines.push(user.username + " - ₹" + user.amount);
                             });
                         }
 
-                        // Add total at bottom
                         lines.push("Total - ₹" + total);
 
                         return lines;
@@ -119,11 +141,10 @@ new Chart(document.getElementById('monthlyChart'), {
         }
     }
 });
-</script>
 
-<script>
-const userYearData = {{ user_year_data|safe }};
-
+// --------------------
+// YEARLY DATA
+// --------------------
 const yearlyLabels = [
     {% for y in yearly %}
         "{{ y.year|date:'Y' }}",
@@ -136,14 +157,15 @@ const yearlyData = [
     {% endfor %}
 ];
 
+// YEARLY CHART
 new Chart(document.getElementById('yearlyChart'), {
-    type: 'line',   // 🔥 IMPORTANT - Line chart
+    type: 'line',
     data: {
         labels: yearlyLabels,
         datasets: [{
             label: 'Yearly Expenses',
             data: yearlyData,
-            tension: 0.3,   // smooth curve
+            tension: 0.3,
             fill: false
         }]
     },
@@ -159,14 +181,12 @@ new Chart(document.getElementById('yearlyChart'), {
 
                         let lines = [];
 
-                        // Add user wise breakdown
                         if (userYearData[year]) {
                             userYearData[year].forEach(function(user) {
                                 lines.push(user.username + " - ₹" + user.amount);
                             });
                         }
 
-                        // Add total at bottom
                         lines.push("Total - ₹" + total);
 
                         return lines;
@@ -177,8 +197,6 @@ new Chart(document.getElementById('yearlyChart'), {
     }
 });
 </script>
-
-
 
 </body>
 </html>
