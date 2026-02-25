@@ -15,6 +15,8 @@ from .models import Income
 from .forms import IncomeForm
 from datetime import datetime
 from .models import MonthlyFinance
+from django.utils import timezone
+
 
 def home(request):
     return render(request, 'home.html')
@@ -203,23 +205,44 @@ def monthly_chart(request):
 
 
 @login_required
+def monthly_chart(request):
+    data = (
+        Expense.objects
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    labels = [d['month'].strftime("%b %Y") for d in data]
+    totals = [float(d['total']) for d in data]
+
+    context = {
+        'labels': json.dumps(labels),
+        'totals': json.dumps(totals),
+    }
+
+    return render(request, 'monthly_chart.html', context)
+
+
 def yearly_chart(request):
-    data = Expense.objects.filter(user=request.user)\
-        .annotate(year=TruncYear('date'))\
-        .values('year')\
-        .annotate(total=Sum('amount'))\
+    data = (
+        Expense.objects
+        .annotate(year=TruncYear('date'))
+        .values('year')
+        .annotate(total=Sum('amount'))
         .order_by('year')
-    return render(request, 'expenses/yearly_chart.html', {'data': data})
+    )
 
+    labels = [d['year'].strftime("%Y") for d in data]
+    totals = [float(d['total']) for d in data]
 
-def manage_expense(request):
-    if request.user.is_superuser:
-        expenses = Expense.objects.all()  # show all users data
-    else:
-        expenses = Expense.objects.filter(user=request.user)  # show only own data
+    context = {
+        'labels': json.dumps(labels),
+        'totals': json.dumps(totals),
+    }
 
-    return render(request, 'manage_expense.html', {'expenses': expenses})
-
+    return render(request, 'yearly_chart.html', context)
 
 def user_login(request):
     if request.method == 'POST':
@@ -244,83 +267,25 @@ from django.db.models import Sum
 from django.db.models.functions import TruncMonth, TruncYear
 from collections import defaultdict
 import json
-
 def admin_dashboard(request):
-    if not request.user.is_superuser:
-        return redirect('home')
-
     total_users = User.objects.count()
+    total_expense_count = Expense.objects.count()
 
-    total_expenses = Expense.objects.aggregate(
-        Sum('amount')
-    )['amount__sum'] or 0
+    this_month_total = Expense.objects.filter(
+        date__month=timezone.now().month,
+        date__year=timezone.now().year
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    total_income = MonthlyFinance.objects.aggregate(
-        Sum('income')
-    )['income__sum'] or 0
-
-    total_balance = total_income - total_expenses
-
-    # -----------------------
-    # MONTHLY TOTAL (EXPENSE)
-    # -----------------------
-    monthly = (
-        Expense.objects
-        .annotate(month=TruncMonth('date'))
-        .values('month')
-        .annotate(total=Sum('amount'))
-        .order_by('month')
-    )
-
-    # -----------------------
-    # YEARLY TOTAL (EXPENSE)
-    # -----------------------
-    yearly = (
-        Expense.objects
-        .annotate(year=TruncYear('date'))
-        .values('year')
-        .annotate(total=Sum('amount'))
-        .order_by('year')
-    )
-
-    # -----------------------
-    # USER MONTH DATA
-    # -----------------------
-    user_month_data = defaultdict(list)
-    expenses = Expense.objects.select_related('user')
-
-    for expense in expenses:
-        month_label = expense.date.strftime("%b %Y")
-        user_month_data[month_label].append({
-            "username": expense.user.username,
-            "amount": float(expense.amount)
-        })
-
-    # -----------------------
-    # USER YEAR DATA
-    # -----------------------
-    user_year_data = defaultdict(list)
-
-    for expense in expenses:
-        year_label = expense.date.strftime("%Y")
-        user_year_data[year_label].append({
-            "username": expense.user.username,
-            "amount": float(expense.amount)
-        })
+    recent_expenses = Expense.objects.select_related('user').order_by('-date')[:5]
 
     context = {
         'total_users': total_users,
-        'total_expenses': total_expenses,
-        'total_income': total_income,
-        'total_balance': total_balance,
-        'monthly': monthly,
-        'yearly': yearly,
-        'user_month_data': json.dumps(user_month_data),
-        'user_year_data': json.dumps(user_year_data),
+        'total_expense_count': total_expense_count,
+        'this_month_total': this_month_total,
+        'recent_expenses': recent_expenses,
     }
 
     return render(request, 'expenses/admin_dashboard.html', context)
-
 
 def add_income(request):
     if request.method == 'POST':
@@ -334,3 +299,66 @@ def add_income(request):
         form = IncomeForm()
 
     return render(request, 'expenses/add_income.html', {'form': form})
+
+
+def admin_user_list(request):
+    if not request.user.is_superuser:
+        return redirect('home')
+
+    users = User.objects.all()
+
+    return render(request, 'expenses/admin_user_list.html', {'users': users})
+
+
+def admin_user_detail(request, user_id):
+    if not request.user.is_superuser:
+        return redirect('home')
+
+    user = User.objects.get(id=user_id)
+
+    # Monthly Expense
+    monthly_expense = (
+        Expense.objects
+        .filter(user=user)
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total_expense=Sum('amount'))
+        .order_by('month')
+    )
+
+    # Monthly Income
+    monthly_income = (
+        MonthlyFinance.objects
+        .filter(user=user)
+        .values('month')
+        .annotate(total_income=Sum('income'))
+        .order_by('month')
+    )
+
+    # Convert income queryset to dictionary
+    income_dict = {
+        entry['month'].strftime("%b %Y"): entry['total_income']
+        for entry in monthly_income
+    }
+
+    monthly_data = []
+
+    for expense in monthly_expense:
+        month_label = expense['month'].strftime("%b %Y")
+        expense_amount = expense['total_expense']
+        income_amount = income_dict.get(month_label, 0)
+        balance = income_amount - expense_amount
+
+        monthly_data.append({
+            'month': month_label,
+            'income': income_amount,
+            'expense': expense_amount,
+            'balance': balance
+        })
+
+    context = {
+        'user': user,
+        'monthly_data': monthly_data
+    }
+
+    return render(request, 'expenses/admin_user_detail.html', context)

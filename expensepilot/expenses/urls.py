@@ -14,4 +14,6 @@ urlpatterns = [
     path('charts/monthly/', views.monthly_chart, name='monthly_chart'),
     path('charts/yearly/', views.yearly_chart, name='yearly_chart'),
     path('income/add/', views.add_income, name='add_income'),
+    path('admin-users/', views.admin_user_list, name='admin_user_list'),
+    path('admin-user/<int:user_id>/', views.admin_user_detail, name='admin_user_detail'),
 ]
