@@ -1,24 +1,36 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Yearly Chart</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h2>Yearly Expense Chart</h2>
-<canvas id="yearChart"></canvas>
+{% block content %}
+
+<h3 class="mb-4">Yearly Expense Chart</h3>
+
+<canvas id="yearlyChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-const labels = [{% for d in data %}"{{ d.year|date:'Y' }}",{% endfor %}];
-const values = [{% for d in data %}{{ d.total }},{% endfor %}];
 
-new Chart(document.getElementById('yearChart'), {
-  type: 'line',
-  data: { labels: labels, datasets: [{ label: 'Yearly Expense', data: values }] }
+const labels = {{ labels|safe }};
+const totals = {{ totals|safe }};
+
+const ctx = document.getElementById('yearlyChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Yearly Expenses',
+            data: totals,
+            tension: 0.4,
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true
+    }
 });
+
 </script>
 
-</body>
-</html>
+{% endblock %}

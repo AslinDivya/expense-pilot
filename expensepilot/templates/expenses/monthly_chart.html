@@ -1,37 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Monthly Expense Chart</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h2>Monthly Expense Chart</h2>
+{% block content %}
 
-<canvas id="monthlyChart" width="600" height="300"></canvas>
+<h3 class="mb-4">Monthly Expense Chart</h3>
+
+<canvas id="monthlyChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
 
-    const labels = JSON.parse('{{ labels|escapejs }}');
-    const data = JSON.parse('{{ amounts|escapejs }}');
+const labels = {{ labels|safe }};
+const amounts = {{ totals|safe }};
 
-    console.log(labels);
-    console.log(data);
+const ctx = document.getElementById('monthlyChart').getContext('2d');
 
-    new Chart(document.getElementById('monthlyChart'), {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Monthly Expense',
-                data: data,
-            }]
-        }
-    });
-
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Monthly Expenses',
+            data: amounts,
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true
+    }
 });
+
 </script>
 
-</body>
-</html>
+{% endblock %}

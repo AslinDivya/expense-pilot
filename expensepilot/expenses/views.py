@@ -222,7 +222,7 @@ def monthly_chart(request):
         'totals': json.dumps(totals),
     }
 
-    return render(request, 'monthly_chart.html', context)
+    return render(request, 'expenses/monthly_chart.html', context)
 
 
 def yearly_chart(request):
@@ -242,7 +242,7 @@ def yearly_chart(request):
         'totals': json.dumps(totals),
     }
 
-    return render(request, 'yearly_chart.html', context)
+    return render(request, 'expenses/yearly_chart.html', context)
 
 def user_login(request):
     if request.method == 'POST':
