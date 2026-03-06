@@ -16,6 +16,7 @@ from .forms import IncomeForm
 from datetime import datetime
 from .models import MonthlyFinance
 from django.utils import timezone
+from django.db.models.functions import ExtractYear
 
 
 def home(request):
@@ -177,35 +178,36 @@ def expense_delete(request, pk):
 @login_required
 
 
-def monthly_chart(request):
+# def monthly_chart(request):
 
-    monthly = (
-        Expense.objects
-        .filter(user=request.user)
-        .annotate(month=TruncMonth('date'))
-        .values('month')
-        .annotate(total=Sum('amount'))
-        .order_by('month')
-    )
+#     monthly = (
+#         Expense.objects
+#         .filter(user=request.user)
+#         .annotate(month=TruncMonth('date'))
+#         .values('month')
+#         .annotate(total=Sum('amount'))
+#         .order_by('month')
+#     )
 
-    labels = []
-    amounts = []
+#     labels = []
+#     amounts = []
 
-    for item in monthly:
-        labels.append(item['month'].strftime("%b %Y"))
-        amounts.append(float(item['total']))
+#     for item in monthly:
+#         labels.append(item['month'].strftime("%b %Y"))
+#         amounts.append(float(item['total']))
 
-    context = {
-        "labels": json.dumps(labels),
-        "amounts": json.dumps(amounts),
-    }
+#     context = {
+#         "labels": json.dumps(labels),
+#         "amounts": json.dumps(amounts),
+#     }
 
-    return render(request, 'expenses/monthly_chart.html', context)
+#     return render(request, 'expenses/monthly_chart.html', context)
 
 
 
 @login_required
 def monthly_chart(request):
+
     data = (
         Expense.objects
         .annotate(month=TruncMonth('date'))
@@ -217,15 +219,34 @@ def monthly_chart(request):
     labels = [d['month'].strftime("%b %Y") for d in data]
     totals = [float(d['total']) for d in data]
 
+    # USER WISE DATA
+    user_month_raw = (
+        Expense.objects
+        .annotate(month=TruncMonth('date'))
+        .values('month','user__username')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    user_month_data = defaultdict(list)
+
+    for item in user_month_raw:
+        month_str = item['month'].strftime("%b %Y")
+
+        user_month_data[month_str].append({
+            "username": item['user__username'],
+            "amount": float(item['total'])
+        })
+
     context = {
         'labels': json.dumps(labels),
         'totals': json.dumps(totals),
+        'user_month_data': json.dumps(user_month_data)
     }
 
-    return render(request, 'expenses/monthly_chart.html', context)
-
-
+    return render(request,'expenses/monthly_chart.html',context)
 def yearly_chart(request):
+
     data = (
         Expense.objects
         .annotate(year=TruncYear('date'))
@@ -237,13 +258,33 @@ def yearly_chart(request):
     labels = [d['year'].strftime("%Y") for d in data]
     totals = [float(d['total']) for d in data]
 
+    # USER WISE YEAR DATA
+    yearly_user_raw = (
+        Expense.objects
+        .annotate(year=TruncYear('date'))
+        .values('year','user__username')
+        .annotate(total=Sum('amount'))
+        .order_by('year')
+    )
+
+    user_year_data = defaultdict(list)
+
+    for item in yearly_user_raw:
+
+        year_str = item['year'].strftime("%Y")
+
+        user_year_data[year_str].append({
+            "username": item['user__username'],
+            "amount": float(item['total'])
+        })
+
     context = {
         'labels': json.dumps(labels),
         'totals': json.dumps(totals),
+        'user_year_data': json.dumps(user_year_data)
     }
 
-    return render(request, 'expenses/yearly_chart.html', context)
-
+    return render(request,'expenses/yearly_chart.html',context)
 def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -362,3 +403,49 @@ def admin_user_detail(request, user_id):
     }
 
     return render(request, 'expenses/admin_user_detail.html', context)
+
+def user_monthly_chart(request):
+
+    data = (
+        Expense.objects
+        .filter(user=request.user)
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    labels = [d['month'].strftime("%b %Y") for d in data]
+    totals = [float(d['total']) for d in data]
+
+    context = {
+        'labels': json.dumps(labels),
+        'totals': json.dumps(totals)
+    }
+
+    return render(request,'expenses/user_monthly_chart.html',context)
+
+def user_yearly_chart(request):
+
+    data = (
+        Expense.objects
+        .filter(user=request.user)
+        .annotate(year=ExtractYear('date'))
+        .values('year')
+        .annotate(total=Sum('amount'))
+        .order_by('year')
+    )
+
+    years = []
+    totals = []
+
+    for item in data:
+        years.append(item['year'])
+        totals.append(item['total'])
+
+    context = {
+        "years": years,
+        "totals": totals
+    }
+
+    return render(request, "expenses/user_yearly_chart.html", context)

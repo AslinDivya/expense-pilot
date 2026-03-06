@@ -11,24 +11,65 @@
 <script>
 
 const labels = {{ labels|safe }};
-const totals = {{ totals|safe }};
+const amounts = {{ totals|safe }};
+const userYearData = JSON.parse('{{ user_year_data|escapejs }}');
 
 const ctx = document.getElementById('yearlyChart').getContext('2d');
 
 new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: labels,
-        datasets: [{
-            label: 'Yearly Expenses',
-            data: totals,
-            tension: 0.4,
-            borderWidth: 2
-        }]
-    },
-    options: {
-        responsive: true
-    }
+
+type: 'line',
+
+data: {
+labels: labels,
+datasets: [{
+label: 'Yearly Expenses',
+data: amounts,
+tension: 0.4
+}]
+},
+
+options: {
+
+responsive: true,
+
+plugins: {
+
+tooltip: {
+
+callbacks: {
+
+label: function(context){
+
+const year = context.label;
+const total = context.raw;
+
+let lines = [];
+
+if(userYearData[year]){
+
+userYearData[year].forEach(function(user){
+
+lines.push(user.username + " - ₹" + user.amount);
+
+});
+
+}
+
+lines.push("Total - ₹" + total);
+
+return lines;
+
+}
+
+}
+
+}
+
+}
+
+}
+
 });
 
 </script>
