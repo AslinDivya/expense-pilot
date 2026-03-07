@@ -2,9 +2,11 @@
 
 {% block content %}
 
-<h3>Register</h3>
+<div class="form-box">
 
-<form method="post">
+<h2>Create Account</h2>
+
+<form method="POST">
 
 {% csrf_token %}
 
@@ -13,5 +15,7 @@
 <button type="submit">Register</button>
 
 </form>
+
+</div>
 
 {% endblock %}

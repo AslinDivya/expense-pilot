@@ -2,12 +2,18 @@
 
 {% block content %}
 
-<h3>User Dashboard</h3>
+<h2>User Dashboard</h2>
 
-<p>Total Expense : {{ total }}</p>
+<p>Total Expense : ₹ {{ total }}</p>
 
-<a href="/expenses/">View Expenses</a>
+<br>
 
-<a href="/income/add/">Add Income</a>
+<a href="/expenses/" class="btn">View Expenses</a>
+
+<a href="/expenses/add/" class="btn">Add Expense</a>
+
+<a href="/charts/monthly/" class="btn">Monthly Chart</a>
+
+<a href="/charts/yearly/" class="btn">Yearly Chart</a>
 
 {% endblock %}

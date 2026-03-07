@@ -2,12 +2,24 @@
 
 {% block content %}
 
-<h3>Admin Dashboard</h3>
+<h2>Admin Dashboard</h2>
 
-<p>Total Users : {{ total_users }}</p>
+<div class="admin-cards">
 
-<p>Total Expenses : {{ total_expenses }}</p>
+<div class="card">
+<h3>Total Users</h3>
+<p>{{ total_users }}</p>
+</div>
 
-<a href="/admin-users/">View Users</a>
+<div class="card">
+<h3>Total Expenses</h3>
+<p>₹ {{ total_expense }}</p>
+</div>
+
+</div>
+
+<br>
+
+<a href="/admin-users/" class="btn">View Users</a>
 
 {% endblock %}

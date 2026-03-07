@@ -2,24 +2,34 @@
 
 {% block content %}
 
-<h3>User List</h3>
+<h2>All Users</h2>
 
-<ul>
+<table class="table">
+
+<tr>
+<th>ID</th>
+<th>Username</th>
+<th>Details</th>
+</tr>
 
 {% for u in users %}
 
-<li>
+<tr>
 
-<a href="/admin-user/{{u.id}}/">
+<td>{{ u.id }}</td>
 
-{{ u.username }}
+<td>{{ u.username }}</td>
 
-</a>
+<td>
 
-</li>
+<a href="/admin-user/{{u.id}}/" class="btn">View</a>
+
+</td>
+
+</tr>
 
 {% endfor %}
 
-</ul>
+</table>
 
 {% endblock %}

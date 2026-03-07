@@ -2,22 +2,24 @@
 
 {% block content %}
 
-<h3>Login</h3>
+<div class="form-box">
 
-<form method="post">
+<h2>User Login</h2>
+
+<form method="POST">
 
 {% csrf_token %}
 
-Username
-<input type="text" name="username">
+<label>Username</label>
+<input type="text" name="username" required>
 
-Password
-<input type="password" name="password">
+<label>Password</label>
+<input type="password" name="password" required>
 
 <button type="submit">Login</button>
 
 </form>
 
-<a href="/register/">Register</a>
+</div>
 
 {% endblock %}

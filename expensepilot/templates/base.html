@@ -1,20 +1,52 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+
 <title>Expense Pilot</title>
+
+<link rel="stylesheet" href="/static/css/style.css">
+
 </head>
 
 <body>
 
-<h2>Expense Pilot</h2>
+<!-- NAVBAR -->
 
-<hr>
+<nav class="navbar">
+
+<div class="logo">
+Expense Pilot
+</div>
+
+<ul class="nav-links">
+
+<li><a href="/">Home</a></li>
+<li><a href="/about/">About</a></li>
+<li><a href="/contact/">Contact</a></li>
+
+</ul>
+
+</nav>
+
+
+<!-- PAGE CONTENT -->
+
+<div class="container">
 
 {% block content %}
 
 {% endblock %}
 
-</body>
+</div>
 
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+<p>© 2026 Expense Pilot | Expense Management System</p>
+
+</footer>
+
+</body>
 </html>
