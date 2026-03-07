@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h3>User Detail</h3>
+
+<p>Username : {{ user.username }}</p>
+
+<h4>Expenses</h4>
+
+<ul>
+
+{% for e in expenses %}
+
+<li>{{ e.title }} - {{ e.amount }}</li>
+
+{% endfor %}
+
+</ul>
+
+{% endblock %}
