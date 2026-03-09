@@ -1,9 +1,6 @@
-
 from django.contrib import admin
-from .models import Expense
+from .models import Expense, Income
 
-@admin.register(Expense)
-class ExpenseAdmin(admin.ModelAdmin):
-    list_display = ('user', 'title', 'amount', 'date')
-    list_filter = ('date', 'user')
-    search_fields = ('title', 'description', 'user__username')
+
+admin.site.register(Expense)
+admin.site.register(Income)

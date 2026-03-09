@@ -1,28 +1,158 @@
-body {
-    background-color: #f4f6f9;
+body{
+margin:0;
+font-family:Arial;
+background:#f4f6fb;
 }
 
-.sidebar {
-    width: 240px;
-    min-height: 100vh;
-    background: linear-gradient(180deg, #1e3c72, #2a5298);
+
+/* NAVBAR */
+
+.navbar{
+background:#0b2a4a;
+color:white;
+display:flex;
+justify-content:space-between;
+padding:15px 40px;
 }
 
-.sidebar-link {
-    display: block;
-    color: white;
-    text-decoration: none;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    transition: 0.3s;
+.logo{
+font-size:20px;
+font-weight:bold;
 }
 
-.sidebar-link:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    padding-left: 15px;
+.nav-links{
+list-style:none;
+display:flex;
+gap:20px;
 }
 
-.card {
-    border-radius: 15px;
+.nav-links a{
+color:white;
+text-decoration:none;
+}
+
+
+/* CONTAINER */
+
+.container{
+padding:40px;
+text-align:center;
+}
+
+
+/* LANDING PAGE */
+
+.landing h1{
+font-size:40px;
+}
+
+.buttons{
+margin-top:30px;
+}
+
+.btn{
+background:#0b2a4a;
+color:white;
+padding:10px 20px;
+margin:10px;
+text-decoration:none;
+display:inline-block;
+}
+
+
+/* FORM */
+
+.form-box{
+width:300px;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:8px;
+}
+
+input{
+width:100%;
+padding:8px;
+margin:10px 0;
+}
+
+
+/* FOOTER */
+
+.footer{
+background:#0b2a4a;
+color:white;
+text-align:center;
+padding:15px;
+margin-top:40px;
+}
+
+body{
+font-family:Arial;
+background:#f4f6fb;
+margin:0;
+}
+
+/* NAVBAR */
+
+.navbar{
+background:#0b2a4a;
+color:white;
+padding:15px 30px;
+display:flex;
+justify-content:space-between;
+}
+
+.navbar a{
+color:white;
+margin-left:20px;
+text-decoration:none;
+}
+
+
+/* CONTAINER */
+
+.container{
+padding:40px;
+}
+
+
+/* BUTTON */
+
+.btn{
+background:#0b2a4a;
+color:white;
+padding:8px 15px;
+text-decoration:none;
+border-radius:4px;
+}
+
+
+/* TABLE */
+
+.table{
+width:100%;
+border-collapse:collapse;
+background:white;
+}
+
+.table th,.table td{
+border:1px solid #ddd;
+padding:10px;
+}
+
+
+/* ADMIN CARDS */
+
+.admin-cards{
+display:flex;
+gap:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+width:200px;
+border-left:5px solid #0b2a4a;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }

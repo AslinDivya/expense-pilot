@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h3>Monthly Expense Chart</h3>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<canvas id="myChart"></canvas>
+
+<script>
+
+const labels = {{ labels|safe }};
+const data = {{ totals|safe }};
+
+new Chart(document.getElementById("myChart"),{
+
+type:"bar",
+
+data:{
+labels:labels,
+datasets:[{
+label:"Monthly Expense",
+data:data
+}]
+}
+
+});
+
+</script>
+
+{% endblock %}

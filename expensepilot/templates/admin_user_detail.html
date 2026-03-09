@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>User Detail</h2>
+
+<p><strong>Username:</strong> {{ user.username }}</p>
+
+<h3>Expenses</h3>
+
+<table class="table">
+
+<tr>
+<th>Title</th>
+<th>Amount</th>
+<th>Date</th>
+</tr>
+
+{% for e in expenses %}
+
+<tr>
+
+<td>{{ e.title }}</td>
+<td>₹ {{ e.amount }}</td>
+<td>{{ e.date }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+<h3>Monthly Expense Chart</h3>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<canvas id="chart"></canvas>
+
+<script>
+
+const labels = {{ labels|safe }};
+const data = {{ totals|safe }};
+
+new Chart(document.getElementById("chart"),{
+
+type:"bar",
+
+data:{
+labels:labels,
+datasets:[{
+label:"Monthly Expense",
+data:data
+}]
+}
+
+});
+
+</script>
+
+{% endblock %}

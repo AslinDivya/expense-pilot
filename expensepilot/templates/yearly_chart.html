@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h3>Yearly Expense Chart</h3>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<canvas id="yearChart"></canvas>
+
+<script>
+
+const years = {{ years|safe }};
+const totals = {{ totals|safe }};
+
+new Chart(document.getElementById("yearChart"),{
+
+type:"line",
+
+data:{
+labels:years,
+datasets:[{
+label:"Yearly Expense",
+data:totals
+}]
+}
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Admin Dashboard</h2>
+
+<div class="admin-cards">
+
+<div class="card">
+<h3>Total Users</h3>
+<p>{{ total_users }}</p>
+</div>
+
+<div class="card">
+<h3>Total Expenses</h3>
+<p>₹ {{ total_expense }}</p>
+</div>
+
+</div>
+
+<br>
+
+<a href="/admin-users/" class="btn">View Users</a>
+
+{% endblock %}

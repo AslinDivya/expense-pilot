@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>User Dashboard</h2>
+
+<p>Total Expense : ₹ {{ total }}</p>
+
+<br>
+
+<a href="/expenses/" class="btn">View Expenses</a>
+
+<a href="/expenses/add/" class="btn">Add Expense</a>
+
+<a href="/charts/monthly/" class="btn">Monthly Chart</a>
+
+<a href="/charts/yearly/" class="btn">Yearly Chart</a>
+
+{% endblock %}
