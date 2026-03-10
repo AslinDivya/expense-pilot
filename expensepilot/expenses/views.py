@@ -10,43 +10,51 @@ import json
 
 
 def home(request):
+
+    # If admin is logged in and coming from admin panel
+    if request.user.is_authenticated and request.user.is_superuser:
+        referer = request.META.get('HTTP_REFERER', '')
+
+        if '/admin/' in referer:
+            return redirect('admin_dashboard')
+
     return render(request,'home.html')
 
 
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import UserCreationForm
+
 def register_view(request):
-
     if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        
+        if form.is_valid():
+            form.save()
+            return redirect('login')   # redirect to login after register
+    
+    else:
+        form = UserCreationForm()
 
-        username = request.POST.get("username")
-        password1 = request.POST.get("password1")
-        password2 = request.POST.get("password2")
+    return render(request, 'register.html', {'form': form})
 
-        if password1 == password2:
 
-            from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
 
-            User.objects.create_user(username=username, password=password1)
-
-            return redirect("login")
-
-    return render(request,"register.html")
 def user_login(request):
-
     if request.method == "POST":
-
         username = request.POST.get("username")
         password = request.POST.get("password")
 
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-
-            login(request,user)
-
+            login(request, user)
             return redirect("dashboard")
+        else:
+            return render(request, "login.html", {"error": "Invalid username or password"})
 
-    return render(request,"login.html")
-
+    return render(request, "login.html")
 @login_required
 def dashboard(request):
 

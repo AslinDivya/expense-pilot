@@ -1,8 +1,59 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
 
-<div class="form-box">
+<style>
+.register-container{
+    width:400px;
+    margin:60px auto;
+    background:#fff;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+.register-container h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-group label{
+    font-weight:bold;
+}
+
+.form-group input{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+.btn-register{
+    width:100%;
+    padding:12px;
+    background:#1976d2;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.btn-register:hover{
+    background:#0d5cb6;
+}
+
+.login-link{
+    text-align:center;
+    margin-top:15px;
+}
+</style>
+
+<div class="register-container">
 
 <h2>Create Account</h2>
 
@@ -10,11 +61,28 @@
 
 {% csrf_token %}
 
-{{ form.as_p }}
+<div class="form-group">
+<label>Username</label>
+{{ form.username }}
+</div>
 
-<button type="submit">Register</button>
+<div class="form-group">
+<label>Password</label>
+{{ form.password1 }}
+</div>
+
+<div class="form-group">
+<label>Confirm Password</label>
+{{ form.password2 }}
+</div>
+
+<button type="submit" class="btn-register">Register</button>
 
 </form>
+
+<div class="login-link">
+Already have an account? <a href="{% url 'login' %}">Login</a>
+</div>
 
 </div>
 
